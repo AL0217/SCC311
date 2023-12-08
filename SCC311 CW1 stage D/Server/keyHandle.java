@@ -3,18 +3,17 @@ import java.io.*;
 import java.util.*;
 
 public class keyHandle {
-    private PublicKey pubKey;
-    private PrivateKey privKey;
+    private KeyPair keyPair;
 
     public PublicKey getPublicKey()
     {
-        return pubKey;
+        return this.keyPair.getPublic();
     }
 
     public PrivateKey getPrivateKey()
     {   
         // System.out.println(privKey);
-        return privKey;
+        return this.keyPair.getPrivate();
     }
 
     public void generateKeys()
@@ -22,9 +21,7 @@ public class keyHandle {
         try {
             KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
             keyPairGenerator.initialize(2048);
-            KeyPair keyPair = keyPairGenerator.genKeyPair();
-            pubKey = keyPair.getPublic();
-            privKey = keyPair.getPrivate();
+            keyPair = keyPairGenerator.genKeyPair();
         } catch (Exception e) {
             // TODO: handle exception
             e.printStackTrace();

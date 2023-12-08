@@ -25,20 +25,49 @@ public class FrontEnd implements Auction{
             registry.rebind(name, auc);
             System.out.println("FrontEnd ready");
 
-
-            String priReplicaName = "priReplica";
-            Registry priRegistry = LocateRegistry.getRegistry("localhost"); 
-            priReplica = (Auction) priRegistry.lookup(priReplicaName);
+            
+            Registry priRegistry = LocateRegistry.getRegistry("localhost");
+            String[] registryList =  priRegistry.list();
+            String priReplicaName;
+            for(int i = 0; i < registryList.length; i++)
+            {
+                if(startsWith("Replica"))
+                {
+                    priReplicaName = registryList[i];
+                    System.out.println(priReplicaName);
+                    break;
+                }
+            }
+            Auction priReplica = (Auction) priRegistry.lookup(priReplicaName);
+            
+            // priReplica = (Auction) priRegistry.bind();
         } catch (Exception e) {
             // TODO: handle exception
-            System.err.println("Exception:");
             e.printStackTrace();        
+        }
+    }
+
+    private void getNewReplica(){
+
+        try {
+            Registry update = LocateRegistry.getRegistry("localhost");
+            String[] newList = update.list();
+
+        } catch (Exception e) {
+            //TODO: handle exception
+            e.printStackTrace();
         }
     }
 
     @Override
     public Integer register(String email, PublicKey pubKey) throws RemoteException {
-        return priReplica.register(email, pubKey);
+        try {
+            return priReplica.register(email, pubKey);
+        } catch (Exception e) {
+            //TODO: handle exception
+            return null;
+        }   
+        
     }
 
     @Override

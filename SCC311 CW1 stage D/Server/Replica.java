@@ -32,9 +32,30 @@ public class Replica implements Auction{
     static HashMap<Integer, String> challenges = new HashMap<>();
 
     //server elements
-    static PublicKey pubKey;
-    static PrivateKey privKey;
+    static keyHandle handler = new keyHandle();
     static int itemCounter = 1;
+
+    public static void main(String[] args)
+    {
+        try {
+            Replica s = new Replica();
+            String name = "Replica" + args[0];
+            Auction auc = (Auction)UnicastRemoteObject.exportObject(s, 0);
+            // handler.generateKeys();
+            // // System.out.println(privKey);
+
+            // // System.out.println(pubKey);
+            // handler.storePublicKey(handler.getPublicKey(), "../keys/serverKey.pub");
+            Registry registry = LocateRegistry.getRegistry();
+            registry.rebind(name, auc);
+
+            System.out.println("Server ready");
+        } catch (Exception e) {
+            // TODO: handle exception
+            System.err.println("Exception:");
+            e.printStackTrace();        
+        }
+    }
 
     @Override
     public Integer register(String email, PublicKey pubKey) throws RemoteException {
@@ -59,63 +80,68 @@ public class Replica implements Auction{
 
     @Override
     public AuctionItem getSpec(int userID,int itemID, String token) throws RemoteException {
-        TokenInfo tokenInfo = registration.get(userID).token;
+        // TokenInfo tokenInfo = registration.get(userID).token;
 
-        //if the token information match the token given AND the token is not expired
-        if(token.equals(tokenInfo.token) && System.currentTimeMillis() < tokenInfo.expiryTime)
-        {
-            try {
-                return auctionItems.get(itemID).getAuctionItem();
-            } catch (Exception e) {
-                e.printStackTrace();
-                return null;
-            }
+        // //if the token information match the token given AND the token is not expired
+        // if(token.equals(tokenInfo.token) && System.currentTimeMillis() < tokenInfo.expiryTime)
+        // {
+            
+        // }
+        // System.out.println("token is wrong or expired");
+        // return null;
+        try {
+            return auctionItems.get(itemID).getAuctionItem();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
         }
-        System.out.println("token is wrong or expired");
-        return null;
+        
     }
 
     @Override
     public Integer newAuction(int userID, AuctionSaleItem item, String token) throws RemoteException {
-        TokenInfo tokenInfo = registration.get(userID).token;
+        // TokenInfo tokenInfo = registration.get(userID).token;
 
-        //if the token information match the token given AND the token is not expired
-        if(token.equals(tokenInfo.token) && System.currentTimeMillis() < tokenInfo.expiryTime)
-        {
-            try {
-                System.out.println(itemCounter);
-                System.out.println("name: " + item.name);
-                System.out.println("description: " + item.description);
-                System.out.println("highestBid: " + item.reservePrice);
-                auctionItems.put(itemCounter, new AuctionNow(itemCounter, item, userID));
-                System.out.println("put item" + itemCounter);
-                return itemCounter++;
-            } catch (Exception e) {
-                e.printStackTrace();
-                return null;
-                // TODO: handle exception
-            }
+        // //if the token information match the token given AND the token is not expired
+        // if(token.equals(tokenInfo.token) && System.currentTimeMillis() < tokenInfo.expiryTime)
+        // {
+            
 
+        // }
+        // System.out.println("token is wrong or expired");
+        // return null;
+        try {
+            System.out.println(itemCounter);
+            System.out.println("name: " + item.name);
+            System.out.println("description: " + item.description);
+            System.out.println("highestBid: " + item.reservePrice);
+            auctionItems.put(itemCounter, new AuctionNow(itemCounter, item, userID));
+            System.out.println("put item" + itemCounter);
+            return itemCounter++;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+            // TODO: handle exception
         }
-        System.out.println("token is wrong or expired");
-        return null;
     }
 
     @Override
     public AuctionItem[] listItems(int userID, String token) throws RemoteException { 
-        TokenInfo tokenInfo = registration.get(userID).token;
+        // TokenInfo tokenInfo = registration.get(userID).token;
 
-        //if the token information match the token given AND the token is not expired
-        if(token.equals(tokenInfo.token) && System.currentTimeMillis() < tokenInfo.expiryTime)
-        {
-            AuctionItem[] listItems = new AuctionItem[auctionItems.size()];
+        // //if the token information match the token given AND the token is not expired
+        // if(token.equals(tokenInfo.token) && System.currentTimeMillis() < tokenInfo.expiryTime)
+        // {
+            
+        // }
+        // System.out.println("token is wrong or expired");
+        // return null;
+
+        AuctionItem[] listItems = new AuctionItem[auctionItems.size()];
             auctionItems.forEach((index, value) -> {
                 listItems[index - 1] = value.getAuctionItem();
             });
             return listItems;
-        }
-        System.out.println("token is wrong or expired");
-        return null;
     }
 
     @Override
@@ -127,172 +153,160 @@ public class Replica implements Auction{
             System.out.println("Not the creator");
             return null;
         }
-        TokenInfo tokenInfo = registration.get(userID).token;
 
-        //if the token information match the token given AND the token is not expired
-        if(token.equals(tokenInfo.token) && System.currentTimeMillis() < tokenInfo.expiryTime)
-        {
-            try {
-                int bidder = item.getBidderID();
-                int bidPrice = item.getAuctionItem().highestBid;
-                
-                //Create the return object
-                AuctionResult result = new AuctionResult();
-                result.winningEmail = registration.get(bidder).email;
-                result.winningPrice = bidPrice;
+        try {
+            int bidder = item.getBidderID();
+            int bidPrice = item.getAuctionItem().highestBid;
+            
+            //Create the return object
+            AuctionResult result = new AuctionResult();
+            result.winningEmail = registration.get(bidder).email;
+            result.winningPrice = bidPrice;
 
-                //remove the auction item from the auction list
-                auctionItems.remove(itemID);
-                return result;
-            } catch (Exception e) {
-                e.printStackTrace();
-                return null;
-                // TODO: handle exception
-            }
+            System.out.println(registration.get(bidder).email);
 
+            //remove the auction item from the auction list
+            auctionItems.remove(itemID);
+            return result;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+            // TODO: handle exception
         }
-        System.out.println("token is wrong or expired");
-        return null;
+        // TokenInfo tokenInfo = registration.get(userID).token;
+
+        // //if the token information match the token given AND the token is not expired
+        // if(token.equals(tokenInfo.token) && System.currentTimeMillis() < tokenInfo.expiryTime)
+        // {
+            
+
+        // }
+        // System.out.println("token is wrong or expired");
+        // return null;
     }
 
     @Override
     public boolean bid(int userID, int itemID, int price, String token) throws RemoteException {
-        TokenInfo tokenInfo = registration.get(userID).token;
+        // TokenInfo tokenInfo = registration.get(userID).token;
 
-        //if the token information match the token given AND the token is not expired
-        if(token.equals(tokenInfo.token) && System.currentTimeMillis() < tokenInfo.expiryTime)
-        {
-            try {
-                AuctionNow targetItem = auctionItems.get(itemID);
-                if(price > targetItem.getAuctionItem().highestBid)
-                {
-                    targetItem.setBidder(userID);
-                    targetItem.setBid(price);
-                    return true;
-                }
-                System.out.println("The bid prie is too low");
-                return false;
-            } catch (Exception e) {
-                return false;
+        // //if the token information match the token given AND the token is not expired
+        // if(token.equals(tokenInfo.token) && System.currentTimeMillis() < tokenInfo.expiryTime)
+        // {
+            
+        // }
+        // System.out.println("token is wrong or expired");
+        // return false;
+
+        try {
+            AuctionNow targetItem = auctionItems.get(itemID);
+            if(price > targetItem.getAuctionItem().highestBid)
+            {
+                targetItem.setBidder(userID);
+                targetItem.setBid(price);
+                return true;
             }
+            System.out.println("The bid prie is too low");
+            return false;
+        } catch (Exception e) {
+            return false;
         }
-        System.out.println("token is wrong or expired");
-        return false;
     }
 
     @Override
     public ChallengeInfo challenge(int userID, String clientChallenge) throws RemoteException {
-        try {
-            byte[] response = signData(clientChallenge, privKey);
-            System.out.println("signed the data");
-            challenges.put(userID, clientChallenge);
-            //generate server side challenge using anything from the ascii chart
-            Random random = new Random();
-            StringBuilder stringBuilder = new StringBuilder();
+        return null;
+        // try {
+
+        //     byte[] response = signData(clientChallenge, handler.getPrivateKey());
+        //     System.out.println("signed the data");
+        //     challenges.put(userID, clientChallenge);
+        //     //generate server side challenge using anything from the ascii chart
+        //     Random random = new Random();
+        //     StringBuilder stringBuilder = new StringBuilder();
             
-            for (int i = 0; i < 10; i++) {
-                int randomAscii = 33 + random.nextInt(126 - 33 + 1);
-                char randomChar = (char) randomAscii;
-                stringBuilder.append(randomChar);
-            }
+        //     for (int i = 0; i < 10; i++) {
+        //         int randomAscii = 33 + random.nextInt(126 - 33 + 1);
+        //         char randomChar = (char) randomAscii;
+        //         stringBuilder.append(randomChar);
+        //     }
 
-            //The challenge info returning
-            ChallengeInfo challengeInfo = new ChallengeInfo();
-            challengeInfo.response = response;
-            challengeInfo.serverChallenge = stringBuilder.toString();
+        //     //The challenge info returning
+        //     ChallengeInfo challengeInfo = new ChallengeInfo();
+        //     challengeInfo.response = response;
+        //     challengeInfo.serverChallenge = stringBuilder.toString();
 
-            //remembering the challenge send
-            User user = registration.get(userID);
-            user.challenge = challengeInfo.serverChallenge;
+        //     //remembering the challenge send
+        //     User user = registration.get(userID);
+        //     user.challenge = challengeInfo.serverChallenge;
 
-            System.out.println("sending challenge back");
-            return challengeInfo;
+        //     System.out.println("sending challenge back");
+        //     return challengeInfo;
 
-        } catch (Exception e) {
-            // TODO: handle exception
-            e.printStackTrace();
-            return null;
-        }
+        // } catch (Exception e) {
+        //     // TODO: handle exception
+        //     e.printStackTrace();
+        //     return null;
+        // }
     }
     @Override
     public TokenInfo authenticate(int userID, byte[] signature) throws RemoteException {
-        User user = registration.get(userID);
-        String challengeSent = user.challenge;
+        return null;
+        // User user = registration.get(userID);
+        // String challengeSent = user.challenge;
 
-        System.out.println(challengeSent);
+        // System.out.println(challengeSent);
 
-        try {
-            Signature sign = Signature.getInstance("SHA256withRSA");
-            sign.initVerify(user.pubKey);
-            sign.update(challengeSent.getBytes());
+        // try {
+        //     Signature sign = Signature.getInstance("SHA256withRSA");
+        //     sign.initVerify(user.pubKey);
+        //     sign.update(challengeSent.getBytes());
 
-            // Verify the signature
-            if(sign.verify(signature))
-            {
-                System.out.println("verified");
-                Random random = new Random();
-                StringBuilder stringBuilder = new StringBuilder();
+        //     // Verify the signature
+        //     if(sign.verify(signature))
+        //     {
+        //         System.out.println("verified");
+        //         Random random = new Random();
+        //         StringBuilder stringBuilder = new StringBuilder();
 
-                //generate server side challenge using anything from the ascii chart
-                for (int i = 0; i < 10; i++) {
-                    int randomAscii = 33 + random.nextInt(126 - 33 + 1);
-                    char randomChar = (char) randomAscii;
-                    stringBuilder.append(randomChar);
-                }
-                String tokenStr = stringBuilder.toString();
-                TokenInfo tokenInfo = new TokenInfo();
-                tokenInfo.token = tokenStr;
-                //set expiry time to 10s
-                tokenInfo.expiryTime = System.currentTimeMillis() + (10 * 1000);
-                user.token = tokenInfo;
-                return tokenInfo;
-            }
-            else
-            {   
-                System.out.println("Failed");
-                return null;
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
+        //         //generate server side challenge using anything from the ascii chart
+        //         for (int i = 0; i < 10; i++) {
+        //             int randomAscii = 33 + random.nextInt(126 - 33 + 1);
+        //             char randomChar = (char) randomAscii;
+        //             stringBuilder.append(randomChar);
+        //         }
+        //         String tokenStr = stringBuilder.toString();
+        //         TokenInfo tokenInfo = new TokenInfo();
+        //         tokenInfo.token = tokenStr;
+        //         //set expiry time to 10s
+        //         tokenInfo.expiryTime = System.currentTimeMillis() + (10 * 1000);
+        //         user.token = tokenInfo;
+        //         return tokenInfo;
+        //     }
+        //     else
+        //     {   
+        //         System.out.println("Failed");
+        //         return null;
+        //     }
+        // } catch (Exception e) {
+        //     e.printStackTrace();
+        //     return null;
+        // }
     }
 
-    private static byte[] signData(String challenge, PrivateKey privateKey) throws Exception {
-        // Create a signature object
-        Signature signature = Signature.getInstance("SHA256withRSA");
+    // private static byte[] signData(String challenge, PrivateKey privateKey) throws Exception {
+    //     // Create a signature object
+    //     Signature signature = Signature.getInstance("SHA256withRSA");
 
-        //signing the challenge
-        signature.initSign(privateKey);
-        signature.update(challenge.getBytes());
+    //     //signing the challenge
+    //     signature.initSign(privateKey);
+    //     signature.update(challenge.getBytes());
 
-        return signature.sign();
-    }
+    //     return signature.sign();
+    // }
  
 
 
-    public static void main(String[] args)
-    {
-        try {
-            Replica s = new Replica();
-            String name = "priReplica";
-            Auction auc = (Auction)UnicastRemoteObject.exportObject(s, 0);
-            keyHandle handler = new keyHandle();
-            handler.generateKeys();
-            pubKey = handler.getPublicKey();
-            privKey = handler.getPrivateKey();
 
-            // System.out.println(pubKey);
-            handler.storePublicKey(pubKey, "../keys/serverKey.pub");
-            Registry registry = LocateRegistry.getRegistry();
-            registry.rebind(name, auc);
-            System.out.println("Server ready");
-        } catch (Exception e) {
-            // TODO: handle exception
-            System.err.println("Exception:");
-            e.printStackTrace();        
-        }
-    }
 
     @Override
     public int getPrimaryReplicaID() throws RemoteException {
