@@ -6,11 +6,12 @@ import java.security.*;
 
 public class FrontEnd implements Auction{
     public static int id;
-    static Auction priReplica;
+    public static Auction priReplica;
+    public static String priReplicaName = "";
     public static void main(String args[])
     {
         try {
-            Replica s = new Replica();
+            FrontEnd s = new FrontEnd();
             String name = "Auction";
             Auction auc = (Auction)UnicastRemoteObject.exportObject(s, 0);
 
@@ -28,7 +29,7 @@ public class FrontEnd implements Auction{
             
             Registry priRegistry = LocateRegistry.getRegistry("localhost");
             String[] registryList =  priRegistry.list();
-            String priReplicaName = "";
+            
             for(int i = 0; i < registryList.length; i++)
             {
                 if(registryList[i].startsWith("Replica"))
@@ -109,6 +110,6 @@ public class FrontEnd implements Auction{
     @Override
     public int getPrimaryReplicaID() throws RemoteException {
         // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getPrimaryReplicaID'");
+        return Integer.parseInt(priReplicaName.substring(priReplicaName.lastIndexOf("a") + 1));
     }
 }

@@ -20,7 +20,7 @@ import java.security.*;
 import java.util.*;
 
 
-public class Replica implements Auction{
+public class Replica implements Server{
 
     //HashMap of auctionItems
     static HashMap<Integer, AuctionNow> auctionItems = new HashMap<>();
@@ -56,6 +56,14 @@ public class Replica implements Auction{
             e.printStackTrace();        
         }
     }
+
+    public void broadcast(HashMap<Integer, AuctionNow> items, HashMap<Integer, User> reg, Set<String> users, int itemCount)
+    {
+        auctionItems = items;
+        registration = reg;
+        userSet = users;
+        itemCounter = itemCount;
+    }   
 
     @Override
     public Integer register(String email, PublicKey pubKey) throws RemoteException {
@@ -310,8 +318,7 @@ public class Replica implements Auction{
 
     @Override
     public int getPrimaryReplicaID() throws RemoteException {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getPrimaryReplicaID'");
+        return -1;
     }
 
 }
