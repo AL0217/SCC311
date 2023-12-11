@@ -48,8 +48,8 @@ public class Replica implements Auction{
             // handler.storePublicKey(handler.getPublicKey(), "../keys/serverKey.pub");
             Registry registry = LocateRegistry.getRegistry();
             registry.rebind(name, auc);
-
             System.out.println("Server ready");
+
         } catch (Exception e) {
             // TODO: handle exception
             System.err.println("Exception:");

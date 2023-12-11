@@ -28,17 +28,17 @@ public class FrontEnd implements Auction{
             
             Registry priRegistry = LocateRegistry.getRegistry("localhost");
             String[] registryList =  priRegistry.list();
-            String priReplicaName;
+            String priReplicaName = "";
             for(int i = 0; i < registryList.length; i++)
             {
-                if(startsWith("Replica"))
+                if(registryList[i].startsWith("Replica"))
                 {
                     priReplicaName = registryList[i];
                     System.out.println(priReplicaName);
                     break;
                 }
             }
-            Auction priReplica = (Auction) priRegistry.lookup(priReplicaName);
+            priReplica = (Auction) priRegistry.lookup(priReplicaName);
             
             // priReplica = (Auction) priRegistry.bind();
         } catch (Exception e) {
@@ -67,7 +67,6 @@ public class FrontEnd implements Auction{
             //TODO: handle exception
             return null;
         }   
-        
     }
 
     @Override
