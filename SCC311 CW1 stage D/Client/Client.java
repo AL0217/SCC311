@@ -36,7 +36,7 @@ public class Client {
         HashMap<Integer, String> Tokens = new HashMap<>();
 
         try{
-            String name = "Auction";
+            String name = "FrontEnd";
             Registry registry = LocateRegistry.getRegistry("localhost"); 
             Auction server = (Auction) registry.lookup(name);
 //            keyHandle handler = new keyHandle();
@@ -95,70 +95,72 @@ public class Client {
             //     // TODO: handle exception
             //     System.out.println("registered");
             // }
+            int auction1 = -1, auction2 = -1;
+            int user1 = -2;
 
-            int user1 = server.register("yunirrrsama@gmail.com", null);
-
-            AuctionSaleItem item = new AuctionSaleItem();
-
-            item.name = "test1";
-            item.description = "first auction";
-            item.reservePrice = 100;
-            System.out.println("created Item 1");
-            int auction1 = server.newAuction(0, item, Tokens.get(0));
-            System.out.println(auction1);
-
-            AuctionSaleItem item1 = new AuctionSaleItem();
-            item1.name = "test2";
-            item1.description = "2 auction";
-            item1.reservePrice = 100;
-            System.out.println("created Item 2");
-            int auction2 = server.newAuction(0, item1, Tokens.get(0));
-            System.out.println(auction2);
-
-            AuctionItem[] itemList = server.listItems(0, "..........");
-            for(int i = 0; i < itemList.length; i++)
+            if(args[0].equals("1"))
             {
-                System.out.println("itemID: " + itemList[i].itemID);
-                System.out.println("name: " + itemList[i].name);
-                System.out.println("description: " + itemList[i].description);
-                System.out.println("highestBid: " + itemList[i].highestBid);
+                user1 = server.register("yunirrrsama@gmail.com", null);
+                System.out.println(user1);
+                AuctionSaleItem item = new AuctionSaleItem();
+    
+                item.name = "test1";
+                item.description = "first auction";
+                item.reservePrice = 100;
+                System.out.println("created Item 1");
+                auction1 = server.newAuction(user1, item, Tokens.get(0));
+                System.out.println(auction1);
+    
+                AuctionSaleItem item1 = new AuctionSaleItem();
+                item1.name = "test2";
+                item1.description = "2 auction";
+                item1.reservePrice = 100;
+                System.out.println("created Item 2");
+                auction2 = server.newAuction(user1, item1, Tokens.get(0));
+                System.out.println(auction2);
+    
+                AuctionItem[] itemList = server.listItems(user1, "..........");
+                for(int i = 0; i < itemList.length; i++)
+                {
+                    System.out.println("itemID: " + itemList[i].itemID);
+                    System.out.println("name: " + itemList[i].name);
+                    System.out.println("description: " + itemList[i].description);
+                    System.out.println("highestBid: " + itemList[i].highestBid);
+                }
+    
+
+                
+                // AuctionResult result = server.closeAuction(user1, auction1, "..........");
+                // System.out.println(result.winningEmail);
+                // System.out.println(result.winningPrice);
             }
+            else
+            {
+                // int user2 = server.register("123321@gmail.com", null);
+    
+                AuctionItem[] itemList = server.listItems(2, "..........");
+                System.out.println(itemList.length);
 
-            boolean b = server.bid(user1, 1, 120, "..........");
+                for(int i = 0; i < itemList.length; i++)
+                {
+                    System.out.println("itemID: " + itemList[i].itemID);
+                    System.out.println("name: " + itemList[i].name);
+                    System.out.println("description: " + itemList[i].description);
+                    System.out.println("highestBid: " + itemList[i].highestBid);
+                }
+    
+                // //user2, item1, price
+                // boolean b = server.bid(1, 1, 120, "..........");
+                // System.out.println(b);
 
-            System.out.println(b);
-            
-            AuctionResult result = server.closeAuction(0, 1, "..........");
-            System.out.println(result.winningEmail);
-            System.out.println(result.winningPrice);
-
-
-            // AuctionItem auctionItem = server.getSpec(auction1);
-            // System.out.println("itemID: " + auctionItem.itemID);
-            // System.out.println("name: " + auctionItem.name);
-            // System.out.println("description: " + auctionItem.description);
-            // System.out.println("highestBid: " + auctionItem.highestBid);
-
-            // AuctionItem item = server.getSpec();
-            // SealedObject item = server.getSpec(n);
-            // try (FileInputStream f = new FileInputStream("../Keys/testKey.aes");) 
-            // {
-            //     byte[] byteKey = f.readAllBytes();
-            //     SecretKey key = new SecretKeySpec(byteKey, 0, byteKey.length, "AES");
-            //     // System.out.println("Got the key");
-            //     Cipher c = Cipher.getInstance("AES");
-            //     c.init(Cipher.DECRYPT_MODE, key);
-
-            //     Serializable unsealObject = (Serializable) item.getObject(c);
-            //     AuctionItem auctionItem = (AuctionItem) unsealObject;
-            //     System.out.println("itemID: " + auctionItem.itemID);
-            //     System.out.println("name: " + auctionItem.name);
-            //     System.out.println("description: " + auctionItem.description);
-            //     System.out.println("highestBid: " + auctionItem.highestBid);
-            // } catch (ClassNotFoundException e) {
-            //     e.printStackTrace();
-            // }
-
+                // //user1, item1, price
+                // boolean b2 = server.bid(2, 1, 140, "..........");
+                // System.out.println(b2);
+                
+                // AuctionResult result = server.closeAuction(1, 1, "..........");
+                // System.out.println(result.winningEmail);
+                // System.out.println(result.winningPrice);
+            }
         }
         catch(Exception e)
         {

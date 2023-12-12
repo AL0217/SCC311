@@ -1,4 +1,6 @@
-public class AuctionNow {
+import java.io.Serializable;
+
+public class AuctionNow implements java.io.Serializable{
     private AuctionItem Item = new AuctionItem();
 
     private int userID;

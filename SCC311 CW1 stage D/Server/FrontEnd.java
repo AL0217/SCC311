@@ -1,45 +1,47 @@
+import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
+
 import java.security.*;
+import java.util.HashSet;
+import java.util.Set;
 
 public class FrontEnd implements Auction{
+    //static variables for connecting to replica
     public static int id;
     public static Auction priReplica;
     public static String priReplicaName = "";
+    public static Registry priRegistry;
+    public static Set<String> connected = new HashSet<>();
     public static void main(String args[])
     {
         try {
             FrontEnd s = new FrontEnd();
-            String name = "Auction";
+            String name = "FrontEnd";
             Auction auc = (Auction)UnicastRemoteObject.exportObject(s, 0);
 
+            Registry registry = LocateRegistry.getRegistry();
+            registry.rebind(name, auc);
+            
+
+            priRegistry = LocateRegistry.getRegistry("localhost");
+            String[] registryList =  priRegistry.list();
+            for(int i = 0; i < registryList.length; i++)
+            {
+                System.out.println(i + "." + registryList[i]);
+            }
+
+            NewReplica();
+            System.out.println("FrontEnd ready");
+            
             // keyHandle handler = new keyHandle();
             // handler.generateKeys();
             // pubKey = handler.getPublicKey();
             // privKey = handler.getPrivateKey();
             // System.out.println(pubKey);
             // handler.storePublicKey(pubKey, "../keys/serverKey.pub");
-
-            Registry registry = LocateRegistry.getRegistry();
-            registry.rebind(name, auc);
-            System.out.println("FrontEnd ready");
-
-            
-            Registry priRegistry = LocateRegistry.getRegistry("localhost");
-            String[] registryList =  priRegistry.list();
-            
-            for(int i = 0; i < registryList.length; i++)
-            {
-                if(registryList[i].startsWith("Replica"))
-                {
-                    priReplicaName = registryList[i];
-                    System.out.println(priReplicaName);
-                    break;
-                }
-            }
-            priReplica = (Auction) priRegistry.lookup(priReplicaName);
             
             // priReplica = (Auction) priRegistry.bind();
         } catch (Exception e) {
@@ -48,14 +50,31 @@ public class FrontEnd implements Auction{
         }
     }
 
-    private void getNewReplica(){
 
+    private static void NewReplica(){
         try {
-            Registry update = LocateRegistry.getRegistry("localhost");
-            String[] newList = update.list();
+            priReplica = null;
+            priRegistry = LocateRegistry.getRegistry("localhost");
+            String[] registryList =  priRegistry.list();
+            for(int i = 0; i < registryList.length; i++)
+            {
+                if(registryList[i].equals("Auction"))
+                {
+                    continue;
+                }
 
+                try {   
+                    priReplica = (Auction) priRegistry.lookup(registryList[i]); 
+                    //call a method on it. If it fails move on to next one 
+                    priReplica.challenge(0, "");
+                    priReplicaName = registryList[i];
+                    System.out.println("Connected to " + registryList[i]);
+                    break;
+                } catch (NotBoundException | RemoteException re) {
+                    System.out.println(registryList[i] + " Failed");
+                }
+            }
         } catch (Exception e) {
-            //TODO: handle exception
             e.printStackTrace();
         }
     }
@@ -65,34 +84,65 @@ public class FrontEnd implements Auction{
         try {
             return priReplica.register(email, pubKey);
         } catch (Exception e) {
-            //TODO: handle exception
-            return null;
-        }   
+            System.out.println("Failed to Connect");
+            NewReplica();
+            return priReplica.register(email, pubKey);
+        }
     }
 
     @Override
     public AuctionItem getSpec(int userID,int itemID, String token) throws RemoteException {
-        return priReplica.getSpec(userID, itemID, token);
+        try {
+            return priReplica.getSpec(userID, itemID, token);
+        } catch (Exception e) {
+            NewReplica();
+            return priReplica.getSpec(userID, itemID, token);
+        }
+        
     }
 
     @Override
     public Integer newAuction(int userID, AuctionSaleItem item, String token) throws RemoteException {
-        return priReplica.newAuction(userID, item, token);
+        try {
+            return priReplica.newAuction(userID, item, token);
+        } catch (Exception e) {
+            NewReplica();
+            return priReplica.newAuction(userID, item, token);
+        }
+        
+       
     }
 
     @Override
     public AuctionItem[] listItems(int userID, String token) throws RemoteException { 
-        return priReplica.listItems(userID, token);
+        try {
+            return priReplica.listItems(userID, token);
+        } catch (Exception e) {
+            NewReplica();
+            return priReplica.listItems(userID, token);
+        }
     }
 
     @Override
     public AuctionResult closeAuction(int userID, int itemID, String token) throws RemoteException {
-        return priReplica.closeAuction(userID, itemID, token);
+        try {
+            return priReplica.closeAuction(userID, itemID, token);
+        } catch (Exception e) {
+            NewReplica();
+            return priReplica.closeAuction(userID, itemID, token);
+        }
+        
     }
 
     @Override
     public boolean bid(int userID, int itemID, int price, String token) throws RemoteException {
-        return priReplica.bid(userID, itemID, price, token);
+        try {
+            return priReplica.bid(userID, itemID, price, token);
+        } catch (Exception e) {
+            NewReplica();
+            return priReplica.bid(userID, itemID, price, token);
+        }
+        
     }
 
     @Override
@@ -102,7 +152,7 @@ public class FrontEnd implements Auction{
 
     @Override
     public TokenInfo authenticate(int userID, byte[] signature) throws RemoteException {
-        return priReplica.authenticate(userID, signature);
+        return null;
     }
 
  
