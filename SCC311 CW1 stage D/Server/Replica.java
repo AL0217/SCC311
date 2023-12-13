@@ -27,6 +27,19 @@ public class Replica implements Server{
     {
         //start this replica as a server
         try {
+            Registry temp = LocateRegistry.getRegistry("localhost");
+            for(int i = 0; i < temp.list().length; i++)
+            {
+                if(temp.list()[i].startsWith("Replica"))
+                {
+                    Server server  = (Server) temp.lookup(temp.list()[i]);
+                    auctionItems = server.getItems();
+                    registration = server.getRegistry();
+                    userSet = server.getUserSet();
+                    itemCounter = server.getItemCount();
+                }
+            }
+
             Replica s = new Replica();
             name = "Replica" + args[0];
             Auction auc = (Auction)UnicastRemoteObject.exportObject(s, 0);
@@ -60,7 +73,7 @@ public class Replica implements Server{
                     try {
                         Server backUps = (Server) backupsRegistry.lookup(backupReplicas[i]);
                         backUps.updateSharedVariable(auctionItems, registration, userSet, itemCounter);
-                    } catch (Exception e) {
+                    } catch (Exception e) {;
                         // e.printStackTrace();
                         System.out.println("failed to connect: " + backupReplicas[i]);
                     }
@@ -237,5 +250,33 @@ public class Replica implements Server{
     @Override
     public int getPrimaryReplicaID() throws RemoteException {
         return -1;
+    }
+
+
+    @Override
+    public HashMap<Integer, AuctionNow> getItems() {
+        // TODO Auto-generated method stub
+        return auctionItems;
+    }
+
+
+    @Override
+    public HashMap<Integer, User> getRegistry() {
+        // TODO Auto-generated method stub
+        return registration;
+    }
+
+
+    @Override
+    public Set<String> getUserSet() {
+        // TODO Auto-generated method stub
+        return userSet;
+    }
+
+
+    @Override
+    public int getItemCount() {
+        // TODO Auto-generated method stub
+        return itemCounter;
     }
 }
