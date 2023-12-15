@@ -3,10 +3,7 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
-
 import java.security.*;
-import java.util.HashSet;
-import java.util.Set;
 
 public class FrontEnd implements Auction{
     //static variables for connecting to replica
@@ -14,7 +11,6 @@ public class FrontEnd implements Auction{
     public static Auction priReplica;
     public static String priReplicaName = "";
     public static Registry priRegistry;
-    public static Set<String> connected = new HashSet<>();
     public static void main(String args[])
     {
         try {
